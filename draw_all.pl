@@ -18,296 +18,34 @@
 
 use strict;
 
-my @ged = <>;
-chomp @ged;
+use GED;
+use DOT;
 
-my %indis = ();
-my %fams = ();
+my $ged = new GED($ARGV[0]);
+my $dot = new DOT();
 
-while ($_ = shift @ged)
+foreach my $family (keys %{$ged->{families}})
 {
-    if (m/^0 HEAD$/)
-    {
-        while ($_ = shift @ged)
-        {
-            if (m/^0/)
-            {
-                unshift @ged, $_;
-                last;
-            }
-        }
-
-        next;
-    }
-
-    if (m/^0 \@(.+)\@ INDI$/)
-    {
-        my $indi = {};
-        $indis{$1} = $indi;
-
-        while ($_ = shift @ged)
-        {
-            if (m/^1 NAME (.+) \/(.+)\/$/)
-            {
-                $indi->{name} = "$1 $2";
-                next;
-            }
-
-            if (m/^1 NAME (.+) \/\/$/)
-            {
-                $indi->{name} = $1;
-                next;
-            }
-
-            if (m/^1 SEX (.+)$/)
-            {
-                $indi->{sex} = $1;
-                next;
-            }
-
-            if (m/^1 BIRT$/)
-            {
-                while ($_ = shift @ged)
-                {
-                    if (m/^2 DATE ?(.*)$/)
-                    {
-                        $indi->{birt}->{date} = $1;
-                        next;
-                    }
-
-                    if (m/^2 PLAC ?(.*)$/)
-                    {
-                        $indi->{birt}->{plac} = $1;
-                        next;
-                    }
-
-                    if (m/^[01]/)
-                    {
-                        unshift @ged, $_;
-                        last;
-                    }
-
-                    print STDERR "unknown: $_\n";
-                }
-
-                next;
-            }
-
-            if (m/^1 DEAT$/)
-            {
-                while ($_ = shift @ged)
-                {
-                    if (m/^2 DATE ?(.*)$/)
-                    {
-                        $indi->{deat}->{date} = $1;
-                        next;
-                    }
-
-                    if (m/^2 PLAC ?(.*)$/)
-                    {
-                        $indi->{deat}->{plac} = $1;
-                        next;
-                    }
-
-                    if (m/^[01]/)
-                    {
-                        unshift @ged, $_;
-                        last;
-                    }
-
-                    print STDERR "unknown: $_\n";
-                }
-
-                next;
-            }
-
-            if (m/^1 FAMC \@(.+)\@$/)
-            {
-                $indi->{famc} = $1;
-                next;
-            }
-
-            if (m/^1 FAMS \@(.+)\@$/)
-            {
-                $indi->{fams}->{$1} = $1;
-                next;
-            }
-
-            if (m/^0/)
-            {
-                unshift @ged, $_;
-                last;
-            }
-
-            print STDERR "unknown: $_\n";
-        }
-
-        next;
-    }
-
-    if (m/^0 \@(.+)\@ FAM$/)
-    {
-        my $fam = {};
-        $fams{$1} = $fam;
-
-        while ($_ = shift @ged)
-        {
-            if (m/^1 HUSB \@(.+)\@$/)
-            {
-                $fam->{husb} = $1;
-                next;
-            }
-
-            if (m/^1 WIFE \@(.+)\@$/)
-            {
-                $fam->{wife} = $1;
-                next;
-            }
-
-            if (m/^1 MARR$/)
-            {
-                $fam->{marr}->{marr} = 1;
-
-                while ($_ = shift @ged)
-                {
-                    if (m/^2 DATE ?(.*)$/)
-                    {
-                        $fam->{marr}->{date} = $1;
-                        next;
-                    }
-
-                    if (m/^2 PLAC ?(.*)$/)
-                    {
-                        $fam->{marr}->{plac} = $1;
-                        next;
-                    }
-
-                    if (m/^[01]/)
-                    {
-                        unshift @ged, $_;
-                        last;
-                    }
-
-                    print STDERR "unknown: $_\n";
-                }
-
-                next;
-            }
-
-            if (m/^1 CHIL \@(.+)\@$/)
-            {
-                $fam->{chil}->{$1} = $1;
-                next;
-            }
-
-            if (m/^0/)
-            {
-                unshift @ged, $_;
-                last;
-            }
-
-            print STDERR "unknown: $_\n";
-        }
-
-        next;
-    }
-
-    if (m/^0 TRLR$/)
-    {
-        while ($_ = shift @ged)
-        {
-            if (m/^0/)
-            {
-                unshift @ged, $_;
-                last;
-            }
-        }
-
-        next;
-    }
-
-    print STDERR "unknown: $_\n";
+    $dot->family($ged->{families}->{$family});
 }
 
-print "digraph G\n{\n";
-
-foreach my $fam (keys %fams)
+foreach my $individual (keys %{$ged->{individuals}})
 {
-    print "    $fam [label=\"";
+    $dot->individual($ged->{individuals}->{$individual});
 
-    my $marr = $fams{$fam}->{marr}->{marr};
-    if ($marr)
+    my $family_children = $ged->{individuals}->{$individual}->{family_children};
+    if ($family_children)
     {
-        print "oo";
-    }
-
-    my $marr_date = $fams{$fam}->{marr}->{date};
-    my $marr_plac = $fams{$fam}->{marr}->{plac};
-    if ($marr_date && $marr_plac)
-    {
-        print " $marr_date\\n$marr_plac"
-    }
-    elsif ($marr_date)
-    {
-        print " $marr_date"
-    }
-    elsif ($marr_plac)
-    {
-        print " $marr_plac"
+        $dot->link($ged->{families}->{$family_children},
+                   $ged->{individuals}->{$individual});
     }
 
-    print "\"];\n";
-}
-
-foreach my $indi (keys %indis)
-{
-    print "    $indi [shape=box,label=\"";
-
-    my $name = $indis{$indi}->{name};
-    print $name;
-
-    my $birt_date = $indis{$indi}->{birt}->{date};
-    my $birt_plac = $indis{$indi}->{birt}->{plac};
-    if ($birt_date && $birt_plac)
+    foreach my $family_spouse
+                (keys %{$ged->{individuals}->{$individual}->{family_spouse}})
     {
-        print "\\n* $birt_date, $birt_plac"
-    }
-    elsif ($birt_date)
-    {
-        print "\\n* $birt_date"
-    }
-    elsif ($birt_plac)
-    {
-        print "\\n* $birt_plac"
-    }
-
-    my $deat_date = $indis{$indi}->{deat}->{date};
-    my $deat_plac = $indis{$indi}->{deat}->{plac};
-    if ($deat_date && $deat_plac)
-    {
-        print "\\n+ $deat_date, $deat_plac"
-    }
-    elsif ($deat_date)
-    {
-        print "\\n+ $deat_date"
-    }
-    elsif ($deat_plac)
-    {
-        print "\\n+ $deat_plac"
-    }
-
-    print "\"];\n";
-
-    my $famc = $indis{$indi}->{famc};
-    if ($famc)
-    {
-        print "    $famc -> $indi;\n";
-    }
-
-    foreach my $fams (keys %{$indis{$indi}->{fams}})
-    {
-        print "    $indi -> $fams;\n";
+        $dot->link($ged->{individuals}->{$individual},
+                   $ged->{families}->{$family_spouse});
     }
 }
 
-print "}\n";
+$dot->close();

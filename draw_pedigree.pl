@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 #########################################################################
 # Copyright (C) 2005 Claus Schrammel                                    #
 #                                                                       #
@@ -15,16 +16,50 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>. #
 #########################################################################
 
-.PHONY: all clean
+use strict;
 
-all:
-	@echo "make <name>.png"
+use GED;
+use DOT;
 
-%.png: %.dot
-	dot -Tpng -o $*.png $*.dot
+my $ged = new GED($ARGV[0]);
+my $dot = new DOT();
 
-%.dot: %.ged
-	./draw_all.pl $*.ged > $*.dot
+pedigree($ARGV[1]);
 
-clean:
-	rm -f *.png
+$dot->close();
+
+exit 0;
+
+#
+# draw pedigree
+#
+sub pedigree
+{
+    my $individual = shift;
+
+    return if (!$individual);
+
+    $dot->individual($ged->{individuals}->{$individual});
+
+    my $family_children = $ged->{individuals}->{$individual}->{family_children};
+    if ($family_children)
+    {
+        my $father = $ged->{families}->{$family_children}->{husband};
+        my $mother = $ged->{families}->{$family_children}->{wife};
+
+        if ($father)
+        {
+            pedigree($father);
+            $dot->link($ged->{individuals}->{$father},
+                       $ged->{individuals}->{$individual});
+        }
+
+        if ($mother)
+        {
+            pedigree($mother);
+            $dot->link($ged->{individuals}->{$mother},
+                       $ged->{individuals}->{$individual});
+        }
+    }
+
+}
