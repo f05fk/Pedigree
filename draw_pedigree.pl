@@ -41,11 +41,11 @@ sub pedigree
 
     $dot->individual($ged->{individuals}->{$individual});
 
-    my $family_children = $ged->{individuals}->{$individual}->{family_children};
-    if ($family_children)
+    my $family_child = $ged->{individuals}->{$individual}->{family_child};
+    if ($family_child)
     {
-        my $father = $ged->{families}->{$family_children}->{husband};
-        my $mother = $ged->{families}->{$family_children}->{wife};
+        my $father = $ged->{families}->{$family_child}->{husband};
+        my $mother = $ged->{families}->{$family_child}->{wife};
 
         if ($father)
         {

@@ -33,10 +33,10 @@ foreach my $individual (keys %{$ged->{individuals}})
 {
     $dot->individual($ged->{individuals}->{$individual});
 
-    my $family_children = $ged->{individuals}->{$individual}->{family_children};
-    if ($family_children)
+    my $family_child = $ged->{individuals}->{$individual}->{family_child};
+    if ($family_child)
     {
-        $dot->link($ged->{families}->{$family_children},
+        $dot->link($ged->{families}->{$family_child},
                    $ged->{individuals}->{$individual});
     }
 

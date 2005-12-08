@@ -155,7 +155,7 @@ sub parse_individual
 
         if (m/^1 FAMC \@(.+)\@$/)
         {
-            $individual->{family_children} = $1;
+            $individual->{family_child} = $1;
             next;
         }
 
