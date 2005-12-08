@@ -120,7 +120,20 @@ sub link
     my $from = shift;
     my $to = shift;
 
-    print "    ", $from->{id}, " -> ", $to->{id}, ";\n";
+    my $weight = shift;
+
+    print "    ", $from->{id}, " -> ", $to->{id}, " [style=bold";
+
+    if ($weight)
+    {
+        print ",weight=", $weight;
+    }
+    else
+    {
+        print ",weight=1";
+    }
+
+    print "];\n";
 }
 
 
