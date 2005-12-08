@@ -318,6 +318,152 @@ sub parse_date_place
     }
 }
 
+sub save
+{
+    my $self = shift;
+    my $ged_file_name = shift;
+
+    open GED, ">$ged_file_name"
+        or die "cannot open GED file '$ged_file_name': $!";
+
+    print GED "0 HEAD\n";
+    print GED "1 CHAR Windows\n";
+    print GED "1 GEDC\n";
+    print GED "2 VERS 5.5\n";
+    print GED "2 FORM LINEAGE-LINKED\n";
+
+    $self->write();
+
+    print GED "0 TRLR\n";
+
+    close GED;
+}
+
+sub write
+{
+    my $self = shift;
+
+    foreach my $individual_id (sort {substr($a,1) <=> substr($b,1)}
+                               keys %{$self->{individuals}})
+    {
+        my $individual = $self->{individuals}->{$individual_id};
+
+        print GED "0 @", $individual_id, "@ INDI\n";
+
+        if ($individual->{name})
+        {
+            print GED "1 NAME ", $individual->{name}, " //\n";
+        }
+
+        if ($individual->{sex})
+        {
+            print GED "1 SEX ", $individual->{sex}, "\n";
+        }
+
+        if ($individual->{birth})
+        {
+            print GED "1 BIRT\n";
+
+            if ($individual->{birth}->{date})
+            {
+                print GED "2 DATE ", &write_date($individual->{birth}->{date}), "\n";
+            }
+
+            if ($individual->{birth}->{place})
+            {
+                print GED "2 PLAC ", $individual->{birth}->{place}, "\n";
+            }
+        }
+
+        if ($individual->{death})
+        {
+            print GED "1 DEAT\n";
+
+            if ($individual->{death}->{date})
+            {
+                print GED "2 DATE ", &write_date($individual->{death}->{date}), "\n";
+            }
+
+            if ($individual->{death}->{place})
+            {
+                print GED "2 PLAC ", $individual->{death}->{place}, "\n";
+            }
+        }
+
+        foreach my $family_spouse (sort {substr($a,1) <=> substr($b,1)}
+                                   keys %{$individual->{family_spouse}})
+        {
+            print GED "1 FAMS @", $family_spouse, "@\n";
+        }
+
+        if ($individual->{family_child})
+        {
+            print GED "1 FAMC @", $individual->{family_child}, "@\n";
+        }
+    }
+
+    foreach my $family_id (sort {substr($a,1) <=> substr($b,1)}
+                           keys %{$self->{families}})
+    {
+        my $family = $self->{families}->{$family_id};
+
+        print GED "0 @", $family_id, "@ FAM\n";
+
+        if ($family->{husband})
+        {
+            print GED "1 HUSB @", $family->{husband}, "@\n";
+        }
+
+        if ($family->{wife})
+        {
+            print GED "1 WIFE @", $family->{wife}, "@\n";
+        }
+
+        if ($family->{marriage})
+        {
+            print GED "1 MARR\n";
+
+            if ($family->{marriage}->{date})
+            {
+                print GED "2 DATE ", &write_date($family->{marriage}->{date}), "\n";
+            }
+
+            if ($family->{marriage}->{place})
+            {
+                print GED "2 PLAC ", $family->{marriage}->{place}, "\n";
+            }
+        }
+
+        foreach my $child (sort {substr($a,1) <=> substr($b,1)}
+                           keys %{$family->{children}})
+        {
+            print GED "1 CHIL @", $child, "@\n";
+        }
+    }
+}
+
+sub write_date
+{
+    my $date = shift;
+
+    $date =~ s/\.//;
+
+    $date =~ s/Jänner/Jan/i;
+    $date =~ s/Feber/Feb/i;
+    $date =~ s/März/Mar/i;
+    $date =~ s/April/Apr/i;
+    $date =~ s/Mai/Mai/i;
+    $date =~ s/Juni/Jun/i;
+    $date =~ s/Juli/Jul/i;
+    $date =~ s/August/Aug/i;
+    $date =~ s/September/Sep/i;
+    $date =~ s/Oktober/Okt/i;
+    $date =~ s/November/Nov/i;
+    $date =~ s/Dezember/Dec/i;
+
+    return $date;
+}
+
 
 1;
 
