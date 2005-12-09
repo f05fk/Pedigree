@@ -24,27 +24,29 @@ use DOT;
 my $ged = new GED($ARGV[0]);
 my $dot = new DOT();
 
-foreach my $family (keys %{$ged->{families}})
+foreach my $family_id (keys %{$ged->{families}})
 {
-    $dot->family($ged->{families}->{$family});
+    my $family = $ged->{families}->{$family_id};
+
+    $dot->family($family);
 }
 
-foreach my $individual (keys %{$ged->{individuals}})
+foreach my $individual_id (keys %{$ged->{individuals}})
 {
-    $dot->individual($ged->{individuals}->{$individual});
+    my $individual = $ged->{individuals}->{$individual_id};
 
-    my $family_child = $ged->{individuals}->{$individual}->{family_child};
-    if ($family_child)
+    $dot->individual($individual);
+
+    my $family_id_child = $individual->{family_child};
+    if ($family_id_child)
     {
-        $dot->link($ged->{families}->{$family_child},
-                   $ged->{individuals}->{$individual});
+        $dot->link($ged->{families}->{$family_id_child}, $individual);
     }
 
-    foreach my $family_spouse
-                (keys %{$ged->{individuals}->{$individual}->{family_spouse}})
+    foreach my $family_id_spouse
+                (keys %{$individual->{family_spouse}})
     {
-        $dot->link($ged->{individuals}->{$individual},
-                   $ged->{families}->{$family_spouse});
+        $dot->link($individual, $ged->{families}->{$family_id_spouse});
     }
 }
 
