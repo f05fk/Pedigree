@@ -60,15 +60,15 @@ sub family
     my $marriage_place = $family->{marriage}->{place};
     if ($marriage_date && $marriage_place)
     {
-        print " $marriage_date\\n$marriage_place"
+        print " $marriage_date\\n$marriage_place";
     }
     elsif ($marriage_date)
     {
-        print " $marriage_date"
+        print " $marriage_date";
     }
     elsif ($marriage_place)
     {
-        print " $marriage_place"
+        print " $marriage_place";
     }
 
     # close the label
@@ -96,20 +96,27 @@ sub individual
     my $name = $individual->{name};
     print $name;
 
+    # profession
+    my $occupation = $individual->{occupation};
+    if ($occupation)
+    {
+        print "\\n$occupation";
+    }
+
     # birth details
     my $birth_date = $individual->{birth}->{date};
     my $birth_place = $individual->{birth}->{place};
     if ($birth_date && $birth_place)
     {
-        print "\\n* $birth_date, $birth_place"
+        print "\\n* $birth_date, $birth_place";
     }
     elsif ($birth_date)
     {
-        print "\\n* $birth_date"
+        print "\\n* $birth_date";
     }
     elsif ($birth_place)
     {
-        print "\\n* $birth_place"
+        print "\\n* $birth_place";
     }
 
     # death details
@@ -117,15 +124,15 @@ sub individual
     my $death_place = $individual->{death}->{place};
     if ($death_date && $death_place)
     {
-        print "\\n+ $death_date, $death_place"
+        print "\\n+ $death_date, $death_place";
     }
     elsif ($death_date)
     {
-        print "\\n+ $death_date"
+        print "\\n+ $death_date";
     }
     elsif ($death_place)
     {
-        print "\\n+ $death_place"
+        print "\\n+ $death_place";
     }
 
     # close the label

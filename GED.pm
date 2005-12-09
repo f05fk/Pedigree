@@ -156,6 +156,27 @@ sub parse_individual
             next;
         }
 
+        if (m/^1 OCCU (.+)$/)
+        {
+            $individual->{occupation} = $1;
+
+            $_ = shift @{$self->{ged_file}};
+            if (!m/^2 DATE/)
+            {
+                unshift @{$self->{ged_file}}, $_;
+                next;
+            }
+
+            $_ = shift @{$self->{ged_file}};
+            if (!m/^2 PLAC/)
+            {
+                unshift @{$self->{ged_file}}, $_;
+                next;
+            }
+
+            next;
+        }
+
         if (m/^1 FAMC \@(.+)\@$/)
         {
             $individual->{family_child} = $1;
@@ -392,6 +413,11 @@ sub write
             {
                 print GED "2 PLAC ", $individual->{death}->{place}, "\n";
             }
+        }
+
+        if ($individual->{occupation})
+        {
+            print GED "1 OCCU ", $individual->{occupation}, "\n";
         }
 
         foreach my $family_spouse (sort {substr($a,1) <=> substr($b,1)}
