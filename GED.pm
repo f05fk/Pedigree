@@ -123,12 +123,15 @@ sub parse_individual
     {
         if (m/^1 NAME (.+) \/(.+)\/$/)
         {
+            $individual->{firstname} = $1;
+            $individual->{lastname} = $2;
             $individual->{name} = "$1 $2";
             next;
         }
 
         if (m/^1 NAME (.+) \/\/$/)
         {
+            $individual->{firstname} = $1;
             $individual->{name} = $1;
             next;
         }
@@ -352,7 +355,8 @@ sub write
 
         if ($individual->{name})
         {
-            print GED "1 NAME ", $individual->{name}, " //\n";
+            print GED "1 NAME ", $individual->{firstname}, " /",
+                                 $individual->{lastname}, "/\n";
         }
 
         if ($individual->{sex})
