@@ -45,14 +45,17 @@ sub family
     my $self = shift;
     my $family = shift;
 
-    print "    ", $family->{id}, " [label=\"";
+    # family node with start of label attribute
+    print "    ", $family->{id}, " [shape=ellipse,label=\"";
 
+    # married couples
     my $marriage = $family->{marriage};
     if ($marriage)
     {
         print "oo";
     }
 
+    # marriage details
     my $marriage_date = $family->{marriage}->{date};
     my $marriage_place = $family->{marriage}->{place};
     if ($marriage_date && $marriage_place)
@@ -68,7 +71,17 @@ sub family
         print " $marriage_place"
     }
 
-    print "\"];\n";
+    # close the label
+    print "\"";
+
+    # group DOT nodes
+    if ($family->{group})
+    {
+        print ",group=\"", $family->{group}, "\"";
+    }
+
+    # close the node attributes
+    print "];\n";
 }
 
 sub individual
@@ -76,11 +89,14 @@ sub individual
     my $self = shift;
     my $individual = shift;
 
+    # individual node with start of label attribute
     print "    ", $individual->{id}, " [shape=box,label=\"";
 
+    # name
     my $name = $individual->{name};
     print $name;
 
+    # birth details
     my $birth_date = $individual->{birth}->{date};
     my $birth_place = $individual->{birth}->{place};
     if ($birth_date && $birth_place)
@@ -96,6 +112,7 @@ sub individual
         print "\\n* $birth_place"
     }
 
+    # death details
     my $death_date = $individual->{death}->{date};
     my $death_place = $individual->{death}->{place};
     if ($death_date && $death_place)
@@ -111,7 +128,17 @@ sub individual
         print "\\n+ $death_place"
     }
 
-    print "\"];\n";
+    # close the label
+    print "\"";
+
+    # group DOT nodes
+    if ($individual->{group})
+    {
+        print ",group=\"", $individual->{group}, "\"";
+    }
+
+    # close the node attributes
+    print "];\n";
 }
 
 sub link
@@ -122,8 +149,10 @@ sub link
 
     my $weight = shift;
 
+    # edge with attributes
     print "    ", $from->{id}, " -> ", $to->{id}, " [style=bold";
 
+    # weight
     if ($weight)
     {
         print ",weight=", $weight;
@@ -133,6 +162,7 @@ sub link
         print ",weight=1";
     }
 
+    # close the edge attributes
     print "];\n";
 }
 

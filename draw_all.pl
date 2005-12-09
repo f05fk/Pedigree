@@ -28,6 +28,17 @@ foreach my $family_id (keys %{$ged->{families}})
 {
     my $family = $ged->{families}->{$family_id};
 
+    if ($family->{marriage})
+    {
+        my $husband = $ged->{individuals}->{$family->{husband}};
+        my $wife = $ged->{individuals}->{$family->{wife}};
+
+        # group the family together
+        $family->{group} = $family_id;
+        $husband->{group} = $family_id;
+        $wife->{group} = $family_id;
+    }
+
     $dot->family($family);
 }
 

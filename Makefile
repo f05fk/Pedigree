@@ -23,7 +23,7 @@ all:
 %.png: %.dot
 	dot -Tpng -o $*.png $*.dot
 
-%.dot: %.ged
+%.dot: %.ged draw_all.pl GED.pm DOT.pm
 	./draw_all.pl $*.ged > $*.dot
 
 clean:
