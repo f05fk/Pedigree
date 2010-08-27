@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #########################################################################
-# Copyright (C) 2005 Claus Schrammel                                    #
+# Copyright (C) 2005-2010 Claus Schrammel                               #
 #                                                                       #
 # This program is free software: you can redistribute it and/or modify  #
 # it under the terms of the GNU General Public License as published by  #
@@ -20,14 +20,49 @@ use strict;
 
 use GED;
 
-my $ged = new GED($ARGV[0]);
+if (scalar(@ARGV) < 4)
+{
+    print "usage: $0 origin.ged dest.ged bound [...] start\n";
+    exit 1;
+}
 
-my $individual = $ged->{individuals}->{"I3"};
-$individual->{keep} = 1;
-&keep_family("F2");
+my $origin = shift;
+my $dest = shift;
+
+my $ged = new GED($origin);
+
+while (scalar(@ARGV) > 1)
+{
+    my $boundary = shift;
+
+    if ($boundary =~ m/^I/)
+    {
+        my $individual = $ged->{individuals}->{$boundary};
+        $individual->{keep} = 1;
+    }
+
+    if ($boundary =~ m/^F/)
+    {
+        my $family = $ged->{families}->{$boundary};
+        $family->{keep} = 1;
+    }
+}
+
+my $start = shift;
+
+if ($start =~ m/^I/)
+{
+    &keep_individual($start);
+}
+
+if ($start =~ m/^F/)
+{
+    &keep_family($start);
+}
+
 &remove_entries();
 
-$ged->save($ARGV[1]);
+$ged->save($dest);
 
 exit 0;
 

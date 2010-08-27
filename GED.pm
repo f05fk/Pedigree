@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #########################################################################
-# Copyright (C) 2005 Claus Schrammel                                    #
+# Copyright (C) 2005-2010 Claus Schrammel                               #
 #                                                                       #
 # This program is free software: you can redistribute it and/or modify  #
 # it under the terms of the GNU General Public License as published by  #
@@ -75,6 +75,16 @@ sub parse
             next;
         }
 
+        if (m/^0 \@(.+)\@ SUBM$/)
+        {
+            my $submitter = {};
+            $self->{submitters}->{$1} = $submitter;
+            $submitter->{id} = $1;
+
+            $self->parse_individual($submitter);
+            next;
+        }
+
         if (m/^0 \@(.+)\@ INDI$/)
         {
             my $individual = {};
@@ -121,6 +131,15 @@ sub parse_individual
 
     while ($_ = shift @{$self->{ged_file}})
     {
+        if (m/^1 NAME (.+) \/(.+)\/ (.*?)$/)
+        {
+            $individual->{firstname} = $1;
+            $individual->{lastname} = $2;
+            $individual->{title} = $3;
+            $individual->{name} = "$3 $1 $2";
+            next;
+        }
+
         if (m/^1 NAME (.+) \/(.+)\/$/)
         {
             $individual->{firstname} = $1;
@@ -130,6 +149,13 @@ sub parse_individual
         }
 
         if (m/^1 NAME (.+) \/\/$/)
+        {
+            $individual->{firstname} = $1;
+            $individual->{name} = $1;
+            next;
+        }
+
+        if (m/^1 NAME (.+)$/)
         {
             $individual->{firstname} = $1;
             $individual->{name} = $1;
@@ -189,6 +215,19 @@ sub parse_individual
             next;
         }
 
+        if (m/^1 NOTE (.+)$/)
+        {
+            $individual->{note} = $1;
+            next;
+        }
+
+        if (m/^1 CHAN$/)
+        {
+            $individual->{change} = {};
+            $self->parse_date_place($individual->{change});
+            next;
+        }
+
         if (m/^0/)
         {
             unshift @{$self->{ged_file}}, $_;
@@ -229,6 +268,19 @@ sub parse_family
         if (m/^1 CHIL \@(.+)\@$/)
         {
             $family->{children}->{$1} = $1;
+            next;
+        }
+
+        if (m/^1 NOTE (.+)$/)
+        {
+            $family->{note} = $1;
+            next;
+        }
+
+        if (m/^1 CHAN$/)
+        {
+            $family->{change} = {};
+            $self->parse_date_place($family->{change});
             next;
         }
 
@@ -288,11 +340,13 @@ sub parse_date_place
             {
                 $month = lc($month);
                 $month = {'jan' => 'Jänner', 'feb' => 'Feber', 'mar' => 'März',
-                          'apr' => 'April', 'mai' => 'Mai', 'jun' => 'Juni',
+                          'apr' => 'April', 'may' => 'Mai', 'jun' => 'Juni',
                           'jul' => 'Juli', 'aug' => 'August',
-                          'sep' => 'September', 'okt' => 'Oktober',
+                          'sep' => 'September', 'oct' => 'Oktober',
                           'nov' => 'November', 'dec' => 'Dezember',
-#                          'mrz' => 'März', 'dez' => 'Dezember'
+                          'abt' => 'ca.', 'ca' => 'ca.',
+                          'mrz' => 'März', 'mai' => 'Mai',
+                          'okt' => 'Oktober', 'dez' => 'Dezember'
                          }->{$month};
                 if (!$month)
                 {
@@ -323,6 +377,12 @@ sub parse_date_place
             }
 
             $date_place->{date} = $date;
+            next;
+        }
+
+        if (m/^3 TIME ?(.*)$/)
+        {
+            $date_place->{time} = $1;
             next;
         }
 

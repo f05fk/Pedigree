@@ -1,5 +1,6 @@
+#!/bin/sh
 #########################################################################
-# Copyright (C) 2005-2010 Claus Schrammel                               #
+# Copyright (C) 2010 Claus Schrammel                                    #
 #                                                                       #
 # This program is free software: you can redistribute it and/or modify  #
 # it under the terms of the GNU General Public License as published by  #
@@ -15,28 +16,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>. #
 #########################################################################
 
-.PHONY: all clean
+if [ "x$2" = "x" ]
+then
+    echo "usage: $0 <name> <page size>" 1>&2
+    echo "e.g.: $0 schreiner 1072x1618" 1>&2
+    exit 1
+fi
 
-all:
-	@echo "make <name>.png"
-
-%.png: %.dot
-	dot -Gcharset=latin1 -Tpng -o $*.png $*.dot
-
-%.dot: %.ged draw_all.pl GED.pm DOT.pm
-	./draw_all.pl $*.ged > $*.dot
-
-barbara.ged: gesamt.ged filter_pedigree.pl Makefile
-	./filter_pedigree.pl gesamt.ged barbara.ged I3
-
-claus.ged: gesamt.ged filter_pedigree.pl Makefile
-	./filter_pedigree.pl gesamt.ged claus.ged I5
-
-schrammel.ged: gesamt.ged filter_ged.pl Makefile
-	./filter_ged.pl gesamt.ged schrammel.ged I3 F2
-
-schreiner.ged: gesamt.ged filter_ged.pl Makefile
-	./filter_ged.pl gesamt.ged schreiner.ged I5 F2
-
-clean:
-	rm -f *.png *.dot barbara.ged claus.ged schrammel.ged schreiner.ged
+convert $1.png -crop $2 +repage $1%02d.png
