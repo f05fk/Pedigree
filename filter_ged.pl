@@ -18,7 +18,7 @@
 
 use strict;
 
-use GED;
+use GED::GED;
 
 if (scalar(@ARGV) < 4)
 {
@@ -29,7 +29,7 @@ if (scalar(@ARGV) < 4)
 my $origin = shift;
 my $dest = shift;
 
-my $ged = new GED($origin);
+my $ged = new GED::GED($origin);
 
 while (scalar(@ARGV) > 1)
 {
@@ -37,13 +37,13 @@ while (scalar(@ARGV) > 1)
 
     if ($boundary =~ m/^I/)
     {
-        my $individual = $ged->{individuals}->{$boundary};
+        my $individual = $ged->getIndividual($boundary);
         $individual->{keep} = 1;
     }
 
     if ($boundary =~ m/^F/)
     {
-        my $family = $ged->{families}->{$boundary};
+        my $family = $ged->getFamily($boundary);
         $family->{keep} = 1;
     }
 }
@@ -52,12 +52,12 @@ my $start = shift;
 
 if ($start =~ m/^I/)
 {
-    &keep_individual($start);
+    &keep_individual($ged->getIndividual($start));
 }
 
 if ($start =~ m/^F/)
 {
-    &keep_family($start);
+    &keep_family($ged->getFamily($start));
 }
 
 &remove_entries();
@@ -68,21 +68,20 @@ exit 0;
 
 sub keep_family
 {
-    my $family_id = shift;
-    my $family = $ged->{families}->{$family_id};
+    my $family = shift;
 
     # exit if not exists
-    return if (!$family);
+    return if (!defined $family);
 
     # exit if already visited
     return if ($family->{keep});
 
     $family->{keep} = 1;
 
-    &keep_individual($family->{husband});
-    &keep_individual($family->{wife});
+    &keep_individual($family->getHusband());
+    &keep_individual($family->getWife());
 
-    foreach my $child (keys %{$family->{children}})
+    foreach my $child ($family->getChildren())
     {
         &keep_individual($child);
     }
@@ -90,84 +89,39 @@ sub keep_family
 
 sub keep_individual
 {
-    my $individual_id = shift;
-    my $individual = $ged->{individuals}->{$individual_id};
+    my $individual = shift;
 
     # exit if not exists
-    return if (!$individual);
+    return if (!defined $individual);
 
     # exit if already visited
     return if ($individual->{keep});
 
     $individual->{keep} = 1;
 
-    &keep_family($individual->{family_child});
+    &keep_family($individual->getFamilyChild());
 
-    foreach my $family_spouse (keys %{$individual->{family_spouse}})
+    foreach my $familySpouse ($individual->getFamiliesSpouse())
     {
-        &keep_family($family_spouse);
+        &keep_family($familySpouse);
     }
 }
 
 sub remove_entries
 {
-    foreach my $family_id (keys %{$ged->{families}})
+    foreach my $family ($ged->getFamilies())
     {
-        my $family = $ged->{families}->{$family_id};
-
-        if ($family->{keep})
+        if (!$family->{keep})
         {
-            my $husband = $ged->{individuals}->{$family->{husband}};
-            if (!$husband || !$husband->{keep})
-            {
-                delete $family->{husband};
-            }
-
-            my $wife = $ged->{individuals}->{$family->{wife}};
-            if (!$wife || !$wife->{keep})
-            {
-                delete $family->{wife};
-            }
-
-            foreach my $child_id (keys %{$family->{children}})
-            {
-                my $child = $ged->{individuals}->{$child_id};
-                if (!$child || !$child->{keep})
-                {
-                    delete $family->{children}->{$child_id};
-                }
-            }
-        }
-        else
-        {
-            delete $ged->{families}->{$family_id};
+            $family->remove();
         }
     }
 
-    foreach my $individual_id (keys %{$ged->{individuals}})
+    foreach my $individual ($ged->getIndividuals())
     {
-        my $individual = $ged->{individuals}->{$individual_id};
-
-        if ($individual->{keep})
+        if (!$individual->{keep})
         {
-            my $family_child = $ged->{families}->{$individual->{family_child}};
-            if (!$family_child || !$family_child->{keep})
-            {
-                delete $individual->{family_child};
-            }
-
-            foreach my $family_spouse_id (keys %{$individual->{family_spouse}})
-            {
-                my $family_spouse = $ged->{families}->{$family_spouse_id};
-                if (!$family_spouse || !$family_spouse->{keep})
-                {
-                    delete $individual->{family_spouse}->{$family_spouse_id};
-                }
-            }
-        }
-        else
-        {
-            delete $ged->{individuals}->{$individual_id};
+            $individual->remove();
         }
     }
 }

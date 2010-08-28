@@ -23,7 +23,7 @@ all:
 %.png: %.dot
 	dot -Gcharset=latin1 -Tpng -o $*.png $*.dot
 
-%.dot: %.ged draw_all.pl GED.pm DOT.pm
+%.dot: %.ged draw_all.pl GED/GED.pm DOT/DOT.pm
 	./draw_all.pl $*.ged > $*.dot
 
 barbara.ged: gesamt.ged filter_pedigree.pl Makefile

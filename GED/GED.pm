@@ -16,9 +16,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>. #
 #########################################################################
 
-package GED;
+package GED::GED;
 
 use strict;
+
+use GED::Individual;
+use GED::Family;
 
 sub new
 {
@@ -29,6 +32,100 @@ sub new
     my $ged_file_name = shift;
     $self->load($ged_file_name);
 
+    return $self;
+}
+
+sub getIndividuals
+{
+    my $self = shift;
+
+    return values %{$self->{individuals}};
+}
+
+sub getIndividual
+{
+    my $self = shift;
+    my $id = shift;
+
+    return $self->{individuals}->{$id};
+}
+
+sub getOrCreateIndividual
+{
+    my $self = shift;
+    my $id = shift;
+
+    my $individual = $self->getIndividual($id);
+    if (!defined $individual)
+    {
+        $individual = new GED::Individual($id, $self);
+        $self->addIndividual($individual);
+    }
+    return $individual;
+}
+
+sub addIndividual
+{
+    my $self = shift;
+    my $individual = shift;
+
+    $self->{individuals}->{$individual->getId()} = $individual;
+    return $self;
+}
+
+sub removeIndividual
+{
+    my $self = shift;
+    my $individual = shift;
+
+    delete $self->{individuals}->{$individual->getId()};
+    return $self;
+}
+
+sub getFamilies
+{
+    my $self = shift;
+
+    return values %{$self->{families}};
+}
+
+sub getFamily
+{
+    my $self = shift;
+    my $id = shift;
+
+    return $self->{families}->{$id};
+}
+
+sub getOrCreateFamily
+{
+    my $self = shift;
+    my $id = shift;
+
+    my $family = $self->getFamily($id);
+    if (!defined $family)
+    {
+        $family = new GED::Family($id, $self);
+        $self->addFamily($family);
+    }
+    return $family;
+}
+
+sub addFamily
+{
+    my $self = shift;
+    my $family = shift;
+
+    $self->{families}->{$family->getId()} = $family;
+    return $self;
+}
+
+sub removeFamily
+{
+    my $self = shift;
+    my $family = shift;
+
+    delete $self->{families}->{$family->getId()};
     return $self;
 }
 
@@ -75,6 +172,7 @@ sub parse
             next;
         }
 
+        # 0 @B1@ SUBM
         if (m/^0 \@(.+)\@ SUBM$/)
         {
             my $submitter = {};
@@ -85,22 +183,18 @@ sub parse
             next;
         }
 
+        # 0 @I5@ INDI
         if (m/^0 \@(.+)\@ INDI$/)
         {
-            my $individual = {};
-            $self->{individuals}->{$1} = $individual;
-            $individual->{id} = $1;
-
+            my $individual = $self->getOrCreateIndividual($1);
             $self->parse_individual($individual);
             next;
         }
 
+        # 0 @F2@ FAM
         if (m/^0 \@(.+)\@ FAM$/)
         {
-            my $family = {};
-            $self->{families}->{$1} = $family;
-            $family->{id} = $1;
-
+            my $family = $self->getOrCreateFamily($1);
             $self->parse_family($family);
             next;
         }
@@ -131,6 +225,7 @@ sub parse_individual
 
     while ($_ = shift @{$self->{ged_file}})
     {
+        # 1 NAME Claus /Schrammel/ DI
         if (m/^1 NAME (.+) \/(.+)\/ (.*?)$/)
         {
             $individual->{firstname} = $1;
@@ -140,6 +235,7 @@ sub parse_individual
             next;
         }
 
+        # 1 NAME Claus /Schrammel/
         if (m/^1 NAME (.+) \/(.+)\/$/)
         {
             $individual->{firstname} = $1;
@@ -148,6 +244,7 @@ sub parse_individual
             next;
         }
 
+        # 1 NAME Claus //
         if (m/^1 NAME (.+) \/\/$/)
         {
             $individual->{firstname} = $1;
@@ -155,6 +252,7 @@ sub parse_individual
             next;
         }
 
+        # 1 NAME Claus
         if (m/^1 NAME (.+)$/)
         {
             $individual->{firstname} = $1;
@@ -162,6 +260,7 @@ sub parse_individual
             next;
         }
 
+        # 1 SEX M
         if (m/^1 SEX (.+)$/)
         {
             $individual->{sex} = $1;
@@ -203,15 +302,17 @@ sub parse_individual
             next;
         }
 
+        # 1 FAMC @F54@
         if (m/^1 FAMC \@(.+)\@$/)
         {
-            $individual->{family_child} = $1;
+            $individual->{familyChild} = $self->getOrCreateFamily($1);
             next;
         }
 
+        # 1 FAMS @F2@
         if (m/^1 FAMS \@(.+)\@$/)
         {
-            $individual->{family_spouse}->{$1} = $1;
+            $individual->{familiesSpouse}->{$1} = $self->getOrCreateFamily($1);
             next;
         }
 
@@ -243,18 +344,19 @@ sub parse_family
     my $self = shift;
     my $family = shift;
 
-
     while ($_ = shift @{$self->{ged_file}})
     {
+        # 1 HUSB @I5@
         if (m/^1 HUSB \@(.+)\@$/)
         {
-            $family->{husband} = $1;
+            $family->{husband} = $self->getOrCreateIndividual($1);
             next;
         }
 
+        # 1 WIFE @I3@
         if (m/^1 WIFE \@(.+)\@$/)
         {
-            $family->{wife} = $1;
+            $family->{wife} = $self->getOrCreateIndividual($1);
             next;
         }
 
@@ -265,9 +367,10 @@ sub parse_family
             next;
         }
 
+        # 1 CHIL @I999@
         if (m/^1 CHIL \@(.+)\@$/)
         {
-            $family->{children}->{$1} = $1;
+            $family->{children}->{$1} = $self->getOrCreateIndividual($1);
             next;
         }
 
@@ -301,24 +404,28 @@ sub parse_date_place
 
     while ($_ = shift @{$self->{ged_file}})
     {
+        # 2 DATE 16 MAY 1975
         if (m/^2 DATE ?(.*)$/)
         {
             my $date = $1;
             my ($day, $month, $year);
 
-
+            # 2 DATE 1975
             if ($date =~ m/^(\d*)$/)
             {
                 $year = $1;
             }
+            # 2 DATE MAY 1975
             elsif ($date =~ m/^(\w*)\s*(\d*)$/)
             {
                 ($month, $year) = ($1, $2);
             }
+            # 2 DATE 16 MAY
             elsif ($date =~ m/^(\d*)\s*(\w*)$/)
             {
                 ($day, $month) = ($1, $2);
             }
+            # 2 DATE 16 MAY 1975
             elsif ($date =~ m/^(\d*)\s*(\w*)\s*(\d*)$/)
             {
                 ($day, $month, $year) = ($1, $2, $3);
@@ -380,6 +487,7 @@ sub parse_date_place
             next;
         }
 
+        # 3 TIME 12:34:56
         if (m/^3 TIME ?(.*)$/)
         {
             $date_place->{time} = $1;
@@ -411,7 +519,7 @@ sub save
         or die "cannot open GED file '$ged_file_name': $!";
 
     print GED "0 HEAD\n";
-    print GED "1 CHAR Windows\n";
+    print GED "1 CHAR LATIN1\n";
     print GED "1 GEDC\n";
     print GED "2 VERS 5.5\n";
     print GED "2 FORM LINEAGE-LINKED\n";
@@ -481,14 +589,14 @@ sub write
         }
 
         foreach my $family_spouse (sort {substr($a,1) <=> substr($b,1)}
-                                   keys %{$individual->{family_spouse}})
+                                   keys %{$individual->{familiesSpouse}})
         {
             print GED "1 FAMS @", $family_spouse, "@\n";
         }
 
-        if ($individual->{family_child})
+        if ($individual->{familyChild})
         {
-            print GED "1 FAMC @", $individual->{family_child}, "@\n";
+            print GED "1 FAMC @", $individual->{familyChild}->{id}, "@\n";
         }
     }
 
@@ -501,12 +609,12 @@ sub write
 
         if ($family->{husband})
         {
-            print GED "1 HUSB @", $family->{husband}, "@\n";
+            print GED "1 HUSB @", $family->{husband}->{id}, "@\n";
         }
 
         if ($family->{wife})
         {
-            print GED "1 WIFE @", $family->{wife}, "@\n";
+            print GED "1 WIFE @", $family->{wife}->{id}, "@\n";
         }
 
         if ($family->{marriage})

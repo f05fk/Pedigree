@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #########################################################################
-# Copyright (C) 2005 Claus Schrammel                                    #
+# Copyright (C) 2010 Claus Schrammel                                    #
 #                                                                       #
 # This program is free software: you can redistribute it and/or modify  #
 # it under the terms of the GNU General Public License as published by  #
@@ -18,48 +18,83 @@
 
 use strict;
 
-use GED;
-use DOT;
+use GED::GED;
 
-my $ged = new GED($ARGV[0]);
-my $dot = new DOT();
+if (scalar(@ARGV) != 3)
+{
+    print "usage: $0 origin.ged dest.ged start\n";
+    exit 1;
+}
 
-pedigree($ARGV[1]);
+my $origin = shift;
+my $dest = shift;
 
-$dot->close();
+my $ged = new GED::GED($origin);
+
+my $start = shift;
+
+if ($start =~ m/^I/)
+{
+    &keep_individual($ged->getIndividual($start));
+}
+
+if ($start =~ m/^F/)
+{
+    &keep_family($ged->getFamily($start));
+}
+
+&remove_entries();
+
+$ged->save($dest);
 
 exit 0;
 
-#
-# draw pedigree
-#
-sub pedigree
+sub keep_family
+{
+    my $family = shift;
+
+    # exit if not exists
+    return if (!defined $family);
+
+    # exit if already visited
+    return if ($family->{keep});
+
+    $family->{keep} = 1;
+
+    &keep_individual($family->getHusband());
+    &keep_individual($family->getWife());
+}
+
+sub keep_individual
 {
     my $individual = shift;
 
-    return if (!$individual);
+    # exit if not exists
+    return if (!defined $individual);
 
-    $dot->individual($ged->{individuals}->{$individual});
+    # exit if already visited
+    return if ($individual->{keep});
 
-    my $family_child = $ged->{individuals}->{$individual}->{family_child};
-    if ($family_child)
+    $individual->{keep} = 1;
+
+    &keep_family($individual->getFamilyChild());
+}
+
+sub remove_entries
+{
+    foreach my $family ($ged->getFamilies())
     {
-        my $father = $ged->{families}->{$family_child}->{husband};
-        my $mother = $ged->{families}->{$family_child}->{wife};
-
-        if ($father)
+        if (!$family->{keep})
         {
-            pedigree($father);
-            $dot->link($ged->{individuals}->{$father},
-                       $ged->{individuals}->{$individual});
-        }
-
-        if ($mother)
-        {
-            pedigree($mother);
-            $dot->link($ged->{individuals}->{$mother},
-                       $ged->{individuals}->{$individual});
+            $family->remove();
         }
     }
 
+    foreach my $individual ($ged->getIndividuals())
+    {
+        if (!$individual->{keep})
+        {
+            $individual->remove();
+        }
+    }
 }

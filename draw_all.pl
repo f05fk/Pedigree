@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #########################################################################
-# Copyright (C) 2005 Claus Schrammel                                    #
+# Copyright (C) 2005-2010 Claus Schrammel                               #
 #                                                                       #
 # This program is free software: you can redistribute it and/or modify  #
 # it under the terms of the GNU General Public License as published by  #
@@ -18,46 +18,41 @@
 
 use strict;
 
-use GED;
-use DOT;
+use GED::GED;
+use DOT::DOT;
 
-my $ged = new GED($ARGV[0]);
-my $dot = new DOT();
+my $ged = new GED::GED($ARGV[0]);
+my $dot = new DOT::DOT();
 
-foreach my $family_id (keys %{$ged->{families}})
+foreach my $family ($ged->getFamilies())
 {
-    my $family = $ged->{families}->{$family_id};
-
     if ($family->{marriage})
     {
-        my $husband = $ged->{individuals}->{$family->{husband}};
-        my $wife = $ged->{individuals}->{$family->{wife}};
+        my $husband = $family->getHusband();
+        my $wife = $family->getWife();
 
         # group the family together
-        $family->{group} = $family_id;
-        $husband->{group} = $family_id;
-        $wife->{group} = $family_id;
+        $family->{group} = $family->{id};
+        $husband->{group} = $family->{id};
+        $wife->{group} = $family->{id};
     }
 
     $dot->family($family);
 }
 
-foreach my $individual_id (keys %{$ged->{individuals}})
+foreach my $individual ($ged->getIndividuals())
 {
-    my $individual = $ged->{individuals}->{$individual_id};
-
     $dot->individual($individual);
 
-    my $family_id_child = $individual->{family_child};
-    if ($family_id_child)
+    my $familyChild = $individual->getFamilyChild();
+    if ($familyChild)
     {
-        $dot->link($ged->{families}->{$family_id_child}, $individual);
+        $dot->link($familyChild, $individual);
     }
 
-    foreach my $family_id_spouse
-                (keys %{$individual->{family_spouse}})
+    foreach my $familySpouse ($individual->getFamiliesSpouse())
     {
-        $dot->link($individual, $ged->{families}->{$family_id_spouse});
+        $dot->link($individual, $familySpouse);
     }
 }
 
