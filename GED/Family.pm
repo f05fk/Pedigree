@@ -20,6 +20,8 @@ package GED::Family;
 
 use strict;
 
+use GED::DatePlace;
+
 sub new
 {
     my $self = {};
@@ -218,6 +220,105 @@ sub setChange
 
     $self->{change} = $change;
     return $self;
+}
+
+sub parse
+{
+    my $self = shift;
+    my $ged = $self->{ged};
+
+    while ($_ = shift @{$ged->{ged_file}})
+    {
+        # 1 HUSB @I5@
+        if (m/^1 HUSB \@(.+)\@$/)
+        {
+            $self->{husband} = $ged->getOrCreateIndividual($1);
+            next;
+        }
+
+        # 1 WIFE @I3@
+        if (m/^1 WIFE \@(.+)\@$/)
+        {
+            $self->{wife} = $ged->getOrCreateIndividual($1);
+            next;
+        }
+
+        if (m/^1 MARR$/)
+        {
+            $self->{marriage} = new GED::DatePlace($ged);
+            $self->{marriage}->parse();
+            next;
+        }
+
+        # 1 CHIL @I999@
+        if (m/^1 CHIL \@(.+)\@$/)
+        {
+            $self->{children}->{$1} = $ged->getOrCreateIndividual($1);
+            next;
+        }
+
+        if (m/^1 NOTE (.+)$/)
+        {
+            $self->{note} = $1;
+            next;
+        }
+
+        if (m/^1 CHAN$/)
+        {
+            $self->{change} = new GED::DatePlace($ged);
+            $self->{change}->parse();
+            next;
+        }
+
+        if (m/^0/)
+        {
+            unshift @{$ged->{ged_file}}, $_;
+            last;
+        }
+
+        print STDERR "Family.parse(): unknown: $_\n";
+    }
+}
+
+sub write
+{
+    my $self = shift;
+    my $fh = shift;
+
+    print $fh "0 @", $self->{id}, "@ FAM\n";
+
+    if ($self->{husband})
+    {
+        print $fh "1 HUSB @", $self->{husband}->getId(), "@\n";
+    }
+
+    if ($self->{wife})
+    {
+        print $fh "1 WIFE @", $self->{wife}->getId(), "@\n";
+    }
+
+    if ($self->{marriage})
+    {
+        print $fh "1 MARR\n";
+        $self->{marriage}->write($fh);
+    }
+
+    foreach my $child (sort {substr($a->getId(),1) <=> substr($b->getId(),1)}
+                       $self->getChildren())
+    {
+        print $fh "1 CHIL @", $child->getId(), "@\n";
+    }
+
+#    if ($self->{note})
+#    {
+#        print $fh "1 NOTE ", $self->{note}, "\n";
+#    }
+#
+#    if ($self->{change})
+#    {
+#        print $fh "1 CHAN\n";
+#        $self->{change}->write($fh);
+#    }
 }
 
 

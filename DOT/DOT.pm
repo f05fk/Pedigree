@@ -26,8 +26,6 @@ sub new
     bless $self;
     my $classname = shift;
 
-#    my $dot_file_name = shift;
-
     print "digraph G\n{\n";
 
     return $self;
