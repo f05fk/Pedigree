@@ -222,6 +222,23 @@ sub setChange
     return $self;
 }
 
+sub getPredecessors
+{
+    my $self = shift;
+
+    my @result = ();
+    push @result, $self->getHusband() if $self->getHusband();
+    push @result, $self->getWife() if $self->getWife();
+    return @result;
+}
+
+sub getSuccessors
+{
+    my $self = shift;
+    
+    return $self->getChildren();
+}
+
 sub parse
 {
     my $self = shift;

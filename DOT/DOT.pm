@@ -78,6 +78,11 @@ sub family
         print ",group=\"", $family->{group}, "\"";
     }
 
+    if ($family->{loop})
+    {
+        print ",style=\"filled\",color=\"red\"";
+    }
+
     # close the node attributes
     print "];\n";
 }
@@ -140,6 +145,11 @@ sub individual
     if ($individual->{group})
     {
         print ",group=\"", $individual->{group}, "\"";
+    }
+
+    if ($individual->{loop})
+    {
+        print ",style=\"filled\",color=\"red\"";
     }
 
     # close the node attributes

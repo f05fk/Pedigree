@@ -19,10 +19,13 @@
 use strict;
 
 use GED::GED;
+use GED::Utils;
 use DOT::DOT;
 
 my $ged = new GED::GED($ARGV[0]);
 my $dot = new DOT::DOT();
+
+GED::Utils->findLoops($ged);
 
 foreach my $family ($ged->getFamilies())
 {

@@ -133,6 +133,36 @@ sub removeFamily
     return $self;
 }
 
+sub getAncestors
+{
+    my $self = shift;
+    my $base = shift;
+
+    my @result = ($base);
+    my $i = 0;
+    while ($i < scalar(@result))
+    {
+        push @result, $result[$i]->getPredecessors();
+        $i++;
+    } 
+    return @result;
+}
+
+sub getDescendants
+{
+    my $self = shift;
+    my $base = shift;
+
+    my @result = ($base);
+    my $i = 0;
+    while ($i < scalar(@result))
+    {
+        push @result, $result[$i]->getSuccessors();
+        $i++;
+    } 
+    return @result;
+}
+
 sub load
 {
     my $self = shift;

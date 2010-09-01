@@ -288,6 +288,22 @@ sub setChange
     return $self;
 }
 
+sub getPredecessors
+{
+    my $self = shift;
+
+    my @result = ();
+    push @result, $self->getFamilyChild() if ($self->getFamilyChild());
+    return $self->getFamilyChild();
+}
+
+sub getSuccessors
+{
+    my $self = shift;
+
+    return $self->getFamiliesSpouse();
+}
+
 sub parse
 {
     my $self = shift;
