@@ -43,8 +43,14 @@ sub family
     my $self = shift;
     my $family = shift;
 
+    print "  subgraph cluster$family->{id} {\n";
+    $self->link($family->{husband}, $family) if ($family->{husband});
+    $self->link($family->{wife}, $family) if ($family->{wife});
+    print "    color=white;\n";
+    print "  }\n";
+
     # family node with start of label attribute
-    print "    ", $family->{id}, " [shape=ellipse,label=\"";
+    print "    $family->{id} [shape=ellipse,label=\"";
 
     # married couples
     my $marriage = $family->{marriage};
@@ -72,12 +78,6 @@ sub family
     # close the label
     print "\"";
 
-    # group DOT nodes
-    if ($family->{group})
-    {
-        print ",group=\"", $family->{group}, "\"";
-    }
-
     if ($family->{loop})
     {
         print ",style=\"filled\",color=\"red\"";
@@ -92,8 +92,10 @@ sub individual
     my $self = shift;
     my $individual = shift;
 
+    $self->link($individual->{familyChild}, $individual) if ($individual->{familyChild});
+
     # individual node with start of label attribute
-    print "    ", $individual->{id}, " [shape=box,label=\"";
+    print "    $individual->{id} [shape=box,label=\"";
 
     # name
     my $name = $individual->{name};
@@ -141,12 +143,6 @@ sub individual
     # close the label
     print "\"";
 
-    # group DOT nodes
-    if ($individual->{group})
-    {
-        print ",group=\"", $individual->{group}, "\"";
-    }
-
     if ($individual->{loop})
     {
         print ",style=\"filled\",color=\"red\"";
@@ -165,20 +161,7 @@ sub link
     my $weight = shift;
 
     # edge with attributes
-    print "    ", $from->{id}, " -> ", $to->{id}, " [style=bold";
-
-    # weight
-    if ($weight)
-    {
-        print ",weight=", $weight;
-    }
-    else
-    {
-        print ",weight=1";
-    }
-
-    # close the edge attributes
-    print "];\n";
+    print "    $from->{id} -> $to->{id} [style=bold];\n";
 }
 
 

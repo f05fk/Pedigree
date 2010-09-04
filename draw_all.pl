@@ -29,34 +29,12 @@ GED::Utils->findLoops($ged);
 
 foreach my $family ($ged->getFamilies())
 {
-    if ($family->{marriage})
-    {
-        my $husband = $family->getHusband();
-        my $wife = $family->getWife();
-
-        # group the family together
-        $family->{group} = $family->{id};
-        $husband->{group} = $family->{id};
-        $wife->{group} = $family->{id};
-    }
-
     $dot->family($family);
 }
 
 foreach my $individual ($ged->getIndividuals())
 {
     $dot->individual($individual);
-
-    my $familyChild = $individual->getFamilyChild();
-    if ($familyChild)
-    {
-        $dot->link($familyChild, $individual);
-    }
-
-    foreach my $familySpouse ($individual->getFamiliesSpouse())
-    {
-        $dot->link($individual, $familySpouse);
-    }
 }
 
 $dot->close();
