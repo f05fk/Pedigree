@@ -27,16 +27,33 @@ all:
 	./draw_all.pl $*.ged > $*.dot
 
 barbara.ged: gesamt.ged filter_pedigree.pl Makefile
-	./filter_pedigree.pl gesamt.ged barbara.ged I3
+	./filter_pedigree.pl gesamt.ged $@ I3
 
 claus.ged: gesamt.ged filter_pedigree.pl Makefile
-	./filter_pedigree.pl gesamt.ged claus.ged I5
+	./filter_pedigree.pl gesamt.ged $@ I5
+
+august_schrammel.ged: gesamt.ged filter_pedigree.pl Makefile
+	./filter_pedigree.pl gesamt.ged $@ I169
+
+anton_schreiner.ged: gesamt.ged filter_pedigree.pl Makefile
+	./filter_pedigree.pl gesamt.ged $@ I140
+
+apollonia_schreiner.ged: gesamt.ged filter_pedigree.pl Makefile
+	./filter_pedigree.pl gesamt.ged $@ I141
+
+anton_supper.ged: gesamt.ged filter_pedigree.pl Makefile
+	./filter_pedigree.pl gesamt.ged $@ I15
+
+maria_supper.ged: gesamt.ged filter_pedigree.pl Makefile
+	./filter_pedigree.pl gesamt.ged $@ I16
 
 schrammel.ged: gesamt.ged filter_ged.pl Makefile
-	./filter_ged.pl gesamt.ged schrammel.ged I3 F2
+	./filter_ged.pl gesamt.ged $@ I3 F2
 
 schreiner.ged: gesamt.ged filter_ged.pl Makefile
-	./filter_ged.pl gesamt.ged schreiner.ged I5 F2
+	./filter_ged.pl gesamt.ged $@ I5 F2
 
 clean:
-	rm -f *.png *.dot barbara.ged claus.ged schrammel.ged schreiner.ged
+	rm -f *.png *.dot
+	rm -f barbara.ged claus.ged schrammel.ged schreiner.ged
+	rm -f anton_schreiner.ged anton_supper.ged apollonia_schreiner.ged august_schrammel.ged maria_supper.ged
