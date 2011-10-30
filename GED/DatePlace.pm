@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #########################################################################
-# Copyright (C) 2010 Claus Schrammel                                    #
+# Copyright (C) 2010-2011 Claus Schrammel                               #
 #                                                                       #
 # This program is free software: you can redistribute it and/or modify  #
 # it under the terms of the GNU General Public License as published by  #
@@ -211,14 +211,27 @@ sub parse_month
     my $month = shift;
 
     $month = lc($month);
-    $month = {'jan' => 'Jänner', 'feb' => 'Feber', 'mar' => 'März',
-              'apr' => 'April', 'may' => 'Mai', 'jun' => 'Juni',
-              'jul' => 'Juli', 'aug' => 'August',
-              'sep' => 'September', 'oct' => 'Oktober',
-              'nov' => 'November', 'dec' => 'Dezember',
-              'abt' => 'ca.', 'ca' => 'ca.',
-              'mrz' => 'März', 'mai' => 'Mai',
-              'okt' => 'Oktober', 'dez' => 'Dezember'
+    $month = {'jan' => 'J�nner',
+#              'jan' => 'Jänner',
+              'feb' => 'Feber',
+              'mar' => 'M�rz',
+#              'mar' => 'März',
+              'apr' => 'April',
+              'may' => 'Mai',
+              'jun' => 'Juni',
+              'jul' => 'Juli',
+              'aug' => 'August',
+              'sep' => 'September',
+              'oct' => 'Oktober',
+              'nov' => 'November',
+              'dec' => 'Dezember',
+              'abt' => 'ca.',
+              'ca' => 'ca.',
+              'mrz' => 'M�rz',
+#              'mrz' => 'März',
+              'mai' => 'Mai',
+              'okt' => 'Oktober',
+              'dez' => 'Dezember'
              }->{$month};
 
     return $month;
@@ -230,9 +243,11 @@ sub write_date
 
     $date =~ s/\.//;
 
-    $date =~ s/Jänner/JAN/i;
+    $date =~ s/J�nner/JAN/i;
+#    $date =~ s/Jänner/JAN/i;
     $date =~ s/Feber/FEB/i;
-    $date =~ s/März/MAR/i;
+    $date =~ s/M�rz/MAR/i;
+#    $date =~ s/März/MAR/i;
     $date =~ s/April/APR/i;
     $date =~ s/Mai/MAY/i;
     $date =~ s/Juni/JUN/i;
