@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 #########################################################################
 # Copyright (C) 2012 Claus Schrammel                                    #
 #                                                                       #
@@ -16,14 +16,40 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>. #
 #########################################################################
 
-my $arg = $ARGV[0];
+use strict;
 
-my $output = `file $arg.png`;
+my $orientation = "-p";
+my $y_sheets = 1;
+my $file;
+
+foreach my $arg (@ARGV)
+{
+    $orientation = $arg if ($arg eq "-p");
+    $orientation = $arg if ($arg eq "-l");
+    $y_sheets = $1 if ($arg =~ m/^-(\d+)$/);
+    $file = $1 if ($arg =~ m/(.+)\.png$/);
+}
+print "orientation $orientation\n";
+print "y_sheets $y_sheets\n";
+print "file $file\n";
+
+my $output = `file $file.png`;
 $output =~ m/(\d+) x (\d+)/   || die "cannot get image size";
 my $x_orig = $1;
 my $y_orig = $2;
+print "x_orig $x_orig\n";
+print "y_orig $y_orig\n";
 
-my $sheets = int($x_orig / ($y_orig / 297.0 * 210.0) + 0.99999);
+my $y_sheet = int($y_orig / $y_sheets + 0.99999);
+print "y_sheet $y_sheet\n";
+my $x_sheet_tmp = $y_sheet / 297.0 * 210.0 if ($orientation eq "-p");
+print "x_sheet_tmp $x_sheet_tmp\n";
+   $x_sheet_tmp = $y_sheet / 210.0 * 297.0 if ($orientation eq "-l");
+print "x_sheet_tmp $x_sheet_tmp\n";
+#my $sheets = int($x_orig / $x_sheet_tmp + 0.99999);
+my $sheets = int($x_orig / $x_sheet_tmp + 0.9);
+print "sheets $sheets\n";
 my $x_sheet = int($x_orig / $sheets + 0.99999);
+print "x_sheet $x_sheet\n";
 
-system("./split.sh $arg ${x_sheet}x${y_orig}");
+system("./split.sh $file ${x_sheet}x${y_sheet}");
