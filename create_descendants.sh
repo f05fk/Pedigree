@@ -19,7 +19,7 @@
 TMP_GED=tmp_$$.ged
 TMP_DOT=tmp_$$.dot
 
-./filter_nachfahren.pl gesamt.ged $TMP_GED $2
+./filter_descendants.pl gesamt.ged $TMP_GED $2
 ./draw_all.pl $TMP_GED > $TMP_DOT
 dot -Gcharset=latin1 -Tpng -o $1.png $TMP_DOT
 
