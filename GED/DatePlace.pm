@@ -1,4 +1,3 @@
-#!/usr/bin/perl
 #########################################################################
 # Copyright (C) 2010-2011 Claus Schrammel                               #
 #                                                                       #
@@ -14,6 +13,8 @@
 #                                                                       #
 # You should have received a copy of the GNU General Public License     #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>. #
+#                                                                       #
+# SPDX-License-Identifier: GPL-3.0-or-later                             #
 #########################################################################
 
 package GED::DatePlace;
@@ -211,10 +212,10 @@ sub parse_month
     my $month = shift;
 
     $month = lc($month);
-    $month = {'jan' => 'Jänner',
+    $month = {'jan' => 'Jï¿½nner',
 #              'jan' => 'JÃ¤nner',
               'feb' => 'Feber',
-              'mar' => 'März',
+              'mar' => 'Mï¿½rz',
 #              'mar' => 'MÃ¤rz',
               'apr' => 'April',
               'may' => 'Mai',
@@ -227,7 +228,7 @@ sub parse_month
               'dec' => 'Dezember',
               'abt' => 'ca.',
               'ca' => 'ca.',
-              'mrz' => 'März',
+              'mrz' => 'Mï¿½rz',
 #              'mrz' => 'MÃ¤rz',
               'mai' => 'Mai',
               'okt' => 'Oktober',
@@ -243,10 +244,10 @@ sub write_date
 
     $date =~ s/\.//;
 
-    $date =~ s/Jänner/JAN/i;
+    $date =~ s/Jï¿½nner/JAN/i;
 #    $date =~ s/JÃ¤nner/JAN/i;
     $date =~ s/Feber/FEB/i;
-    $date =~ s/März/MAR/i;
+    $date =~ s/Mï¿½rz/MAR/i;
 #    $date =~ s/MÃ¤rz/MAR/i;
     $date =~ s/April/APR/i;
     $date =~ s/Mai/MAY/i;

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #########################################################################
 # Copyright (C) 2012 Claus Schrammel                                    #
 #                                                                       #
@@ -14,9 +14,12 @@
 #                                                                       #
 # You should have received a copy of the GNU General Public License     #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>. #
+#                                                                       #
+# SPDX-License-Identifier: GPL-3.0-or-later                             #
 #########################################################################
 
 use strict;
+use warnings;
 
 my $orientation = "-p";
 my $y_sheets = 1;
