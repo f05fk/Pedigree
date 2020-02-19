@@ -1,6 +1,6 @@
 #!/bin/sh
 #########################################################################
-# Copyright (C) 2010 Claus Schrammel                                    #
+# Copyright (C) Claus Schrammel <claus@f05fk.net>                       #
 #                                                                       #
 # This program is free software: you can redistribute it and/or modify  #
 # it under the terms of the GNU General Public License as published by  #
